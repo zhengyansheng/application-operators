@@ -29,7 +29,9 @@ type ApplicationSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Application. Edit application_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	Image    string `json:"foo,omitempty"`
 }
 
 // ApplicationStatus defines the observed state of Application

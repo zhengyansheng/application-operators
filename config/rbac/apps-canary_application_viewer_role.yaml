@@ -1,0 +1,23 @@
+# permissions for end users to view applications.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: application-operators
+    app.kubernetes.io/managed-by: kustomize
+  name: apps-canary-application-viewer-role
+rules:
+- apiGroups:
+  - apps-canary.vk.io--owner
+  resources:
+  - applications
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps-canary.vk.io--owner
+  resources:
+  - applications/status
+  verbs:
+  - get

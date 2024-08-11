@@ -93,6 +93,8 @@ func (r *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *ApplicationReconciler) genDeployment(app *appsapplicationv1.Application) (*appsv1.Deployment, error) {
 	maxUnavailable := intstr.FromInt32(0)
 	maxSurge := intstr.FromInt32(1)
+	labels := map[string]string{"app": app.Name}
+
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      app.Name,
@@ -100,9 +102,7 @@ func (r *ApplicationReconciler) genDeployment(app *appsapplicationv1.Application
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"app": app.Name,
-				},
+				MatchLabels: labels,
 			},
 			Strategy: appsv1.DeploymentStrategy{
 				Type: appsv1.RollingUpdateDeploymentStrategyType,
@@ -113,6 +113,7 @@ func (r *ApplicationReconciler) genDeployment(app *appsapplicationv1.Application
 			},
 			Replicas: app.Spec.Replicas,
 			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{Labels: labels},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{

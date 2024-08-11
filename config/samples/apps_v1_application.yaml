@@ -6,4 +6,6 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: application-sample
 spec:
-  # TODO(user): Add fields here
+  name: "application-sample"
+  replicas: 2
+  image: "registry.cn-beijing.aliyuncs.com/zhengyansheng/nginx:v1.0"

@@ -11,6 +11,8 @@ spec:
     kind: Application
     listKind: ApplicationList
     plural: applications
+    shortNames:
+    - app
     singular: application
   scope: Namespaced
   versions:
@@ -40,8 +42,6 @@ spec:
             description: ApplicationSpec defines the desired state of Application
             properties:
               image:
-                type: string
-              name:
                 type: string
               replicas:
                 format: int32

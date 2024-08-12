@@ -28,7 +28,6 @@ type ApplicationSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Name     string `json:"name,omitempty"`
 	Replicas *int32 `json:"replicas,omitempty"`
 	Image    string `json:"image,omitempty"`
 }
@@ -41,6 +40,7 @@ type ApplicationStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:shortName=app
 
 // Application is the Schema for the applications API
 type Application struct {

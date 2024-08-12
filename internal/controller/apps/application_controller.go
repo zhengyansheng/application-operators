@@ -18,18 +18,18 @@ package apps
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
+	appsapplicationv1 "github.com/zhengyansheng/application-operators/api/apps/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	appsapplicationv1 "github.com/zhengyansheng/application-operators/api/apps/v1"
 )
 
 // ApplicationReconciler reconciles a Application object
@@ -53,38 +53,50 @@ type ApplicationReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.18.4/pkg/reconcile
 func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.logger = log.FromContext(ctx)
+	//r.logger = log.FromContext(ctx)
+	klog.Info("Start Reconcile")
 
 	// TODO(user): your logic here
 	app := &appsapplicationv1.Application{}
 	if err := r.Get(ctx, req.NamespacedName, app); err != nil {
-		r.logger.Error(err, "unable to fetch application")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	deployment, err := r.genDeployment(app)
-	if err != nil {
-		return ctrl.Result{}, err
+	{
+		// Create Deployment
+		deployment, err := r.genDeployment(app)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		op, err := ctrl.CreateOrUpdate(ctx, r.Client, deployment, func() error {
+			gen, err := r.genDeployment(app)
+			if err != nil {
+				klog.Warningf("generator created or updated err: %v", err)
+				return err
+			}
+			deployment.Spec = gen.Spec
+			return ctrl.SetControllerReference(app, deployment, r.Scheme) // 设置引用关系
+		})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if op != controllerutil.OperationResultNone {
+			klog.Infof("Resource created or updated, operation: %v", op)
+		}
 	}
 
-	// 使用 CreateOrUpdate 处理资源的创建或更新
-	op, err := ctrl.CreateOrUpdate(ctx, r.Client, deployment, func() error {
-		return ctrl.SetControllerReference(app, deployment, r.Scheme) // 设置从属关联关系
-	})
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if op != controllerutil.OperationResultNone {
-		// 如果发生创建或更新操作，可以记录日志或执行其他操作
-		log.Log.Info("Resource created or updated", "operation", op)
-	}
-
+	klog.Info("End Reconcile")
 	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	//return ctrl.NewControllerManagedBy(mgr).
+	//	For(&appsapplicationv1.Application{}). // 设置主资源
+	//	Owns(&appsv1.Deployment{}).            // 设置从资源，可以支持多个
+	//	Complete(r)
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&appsapplicationv1.Application{}).
 		Complete(r)

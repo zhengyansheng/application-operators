@@ -4,8 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/name: application-operators
     app.kubernetes.io/managed-by: kustomize
-  name: application-sample
+  name: application-crd
 spec:
-  name: "application-sample"
-  replicas: 2
-  image: "registry.cn-beijing.aliyuncs.com/zhengyansheng/nginx:v1.0"
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/zhengyansheng/nginx:v2.0"
